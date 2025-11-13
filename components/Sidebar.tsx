@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Section } from '../types';
-import { HomeIcon, CalendarIcon, DocumentTextIcon, ClipboardCheckIcon, PresentationChartBarIcon, XIcon } from './Icons';
+import { HomeIcon, CalendarIcon, DocumentTextIcon, ClipboardCheckIcon, PresentationChartBarIcon, XIcon, Cog6ToothIcon } from './Icons';
 import Logo from './Logo';
 
 interface SidebarProps {
@@ -11,11 +12,12 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { section: Section.Dashboard, icon: HomeIcon, label: 'Dashboard' },
+  { section: Section.Dashboard, icon: HomeIcon, label: 'INICIO' },
   { section: Section.Calendar, icon: CalendarIcon, label: 'Calendario y Agenda' },
   { section: Section.Documents, icon: DocumentTextIcon, label: 'Documentos' },
   { section: Section.Tasks, icon: ClipboardCheckIcon, label: 'Tareas' },
   { section: Section.Reports, icon: PresentationChartBarIcon, label: 'Informes' },
+  { section: Section.Settings, icon: Cog6ToothIcon, label: 'Ajustes' },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ activeSection, setActiveSection, isOpen, setIsOpen }) => {
@@ -34,7 +36,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, setActiveSection, isOp
         <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-3">
               <Logo className="h-8 w-auto"/>
-              <span className="font-semibold text-lg text-gray-700 dark:text-gray-300">Oficina Virtual</span>
+              <span className="font-semibold text-lg text-gray-800 dark:text-gray-200 tracking-tight">OFFICE VIRTUAL DNF</span>
           </div>
           <button onClick={() => setIsOpen(false)} className="md:hidden p-1 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200">
             <XIcon className="w-6 h-6" />
@@ -51,7 +53,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, setActiveSection, isOp
                   }}
                   className={`w-full flex items-center px-4 py-2 my-1 text-left rounded-lg transition-colors duration-200 ${
                     activeSection === item.section
-                      ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300'
+                      ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 font-semibold'
                       : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -63,7 +65,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeSection, setActiveSection, isOp
           </ul>
         </nav>
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-xs text-center text-gray-500">DNF © 2024</p>
+            <p className="text-xs text-center text-gray-500">OFFICE VIRTUAL DNF © 2024</p>
         </div>
       </aside>
     </>

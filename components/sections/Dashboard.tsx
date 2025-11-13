@@ -9,6 +9,14 @@ interface DashboardProps {
   setActiveSection: (section: Section) => void;
 }
 
+const isToday = (dateString: string) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    return date.getFullYear() === today.getFullYear() &&
+           date.getMonth() === today.getMonth() &&
+           date.getDate() === today.getDate();
+};
+
 const Dashboard: React.FC<DashboardProps> = ({ setActiveSection }) => {
   const { tasks, documents, events } = useAppContext();
 
@@ -16,13 +24,37 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveSection }) => {
   const upcomingEvents = events
     .filter(event => new Date(event.start) > new Date())
     .slice(0, 3);
+  
+  const recentDocuments = [...documents]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 3);
+
+  const tasksToday = tasks.filter(task => isToday(task.dueDate));
+  const completedTasksToday = tasksToday.filter(task => task.status === TaskStatus.Completed);
+  const pendingTasksTodayCount = tasksToday.length - completedTasksToday.length;
+  const completionPercentage = tasksToday.length > 0 ? (completedTasksToday.length / tasksToday.length) * 100 : 0;
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Dashboard</h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">Un resumen de la actividad de tu oficina.</p>
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">INICIO</h1>
+        <p className="text-gray-500 dark:text-gray-400 mt-1">Bienvenido a tu oficina virtual. Aquí tienes un resumen de tu actividad.</p>
       </div>
+      
+      <Card>
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="font-semibold text-gray-700 dark:text-gray-300">Progreso del Día</h2>
+            <span className="text-sm font-medium text-red-500">{pendingTasksTodayCount} Tareas Pendientes para Hoy</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-4 dark:bg-gray-700">
+              <div 
+                  className="bg-green-500 h-4 rounded-full text-center text-white text-xs font-bold leading-4"
+                  style={{ width: `${completionPercentage}%` }}
+              >
+                  {completionPercentage > 10 ? `${completionPercentage.toFixed(0)}%` : ''}
+              </div>
+          </div>
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="flex items-center justify-between bg-gradient-to-br from-yellow-400 to-orange-500 text-white">
@@ -63,9 +95,9 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveSection }) => {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card>
-          <h2 className="text-xl font-semibold mb-4">Tareas Pendientes Urgentes</h2>
+          <h2 className="text-xl font-semibold mb-4">Tareas Pendientes</h2>
           <ul className="space-y-3">
             {pendingTasks.slice(0, 5).map(task => (
               <li key={task.id} className="flex items-center justify-between p-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700">
@@ -81,7 +113,7 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveSection }) => {
         </Card>
         
         <Card>
-          <h2 className="text-xl font-semibold mb-4">Próximos Eventos en la Agenda</h2>
+          <h2 className="text-xl font-semibold mb-4">Próximos Eventos</h2>
           <ul className="space-y-3">
             {upcomingEvents.map(event => (
               <li key={event.id} className="flex items-start p-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700">
@@ -96,6 +128,21 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveSection }) => {
               </li>
             ))}
             {upcomingEvents.length === 0 && <p className="text-center text-gray-400 py-4">No hay eventos próximos.</p>}
+          </ul>
+        </Card>
+        
+        <Card>
+          <h2 className="text-xl font-semibold mb-4">Documentos Recientes</h2>
+          <ul className="space-y-3">
+            {recentDocuments.map(doc => (
+              <li key={doc.id} className="flex items-center justify-between p-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700">
+                <div>
+                    <p className="font-medium">{doc.title}</p>
+                    <p className="text-sm text-gray-500">Por: {doc.author}</p>
+                </div>
+              </li>
+            ))}
+            {recentDocuments.length === 0 && <p className="text-center text-gray-400 py-4">No hay documentos recientes.</p>}
           </ul>
         </Card>
       </div>

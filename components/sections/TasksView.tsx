@@ -5,14 +5,18 @@ import Card from '../common/Card';
 import Modal from '../common/Modal';
 import TaskForm from '../forms/TaskForm';
 import { EyeIcon, PencilIcon, PlusIcon, TrashIcon, PaperClipIcon } from '../Icons';
+import { usePagination } from '../../hooks/usePagination';
+import PaginationControls from '../common/PaginationControls';
 
 const PriorityBadge: React.FC<{ priority: TaskPriority }> = ({ priority }) => {
     const priorityStyles = {
+        [TaskPriority.Urgent]: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
         [TaskPriority.High]: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
         [TaskPriority.Medium]: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
         [TaskPriority.Low]: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
     };
     const priorityText = {
+        [TaskPriority.Urgent]: 'Urgente',
         [TaskPriority.High]: 'Alta',
         [TaskPriority.Medium]: 'Media',
         [TaskPriority.Low]: 'Baja',
@@ -58,6 +62,16 @@ const TasksView: React.FC = () => {
     .filter(task => task.status === view)
     .filter(task => priorityFilter === 'all' || task.priority === priorityFilter);
   
+  const {
+      paginatedData: paginatedTasks,
+      currentPage,
+      totalPages,
+      nextPage,
+      prevPage,
+      canGoNext,
+      canGoPrev
+  } = usePagination(filteredTasks, 9);
+  
   const getModalTitle = () => {
     if (modalMode === 'create') return 'Crear Nueva Tarea';
     if (modalMode === 'edit') return 'Editar Tarea';
@@ -90,6 +104,7 @@ const TasksView: React.FC = () => {
         <div className="flex items-center gap-2 mt-4 flex-wrap">
             <span className="text-sm font-medium text-gray-500 mr-2">Prioridad:</span>
             <FilterButton onClick={() => setPriorityFilter('all')} isActive={priorityFilter === 'all'}>Todas</FilterButton>
+            <FilterButton onClick={() => setPriorityFilter(TaskPriority.Urgent)} isActive={priorityFilter === TaskPriority.Urgent}>Urgente</FilterButton>
             <FilterButton onClick={() => setPriorityFilter(TaskPriority.High)} isActive={priorityFilter === TaskPriority.High}>Alta</FilterButton>
             <FilterButton onClick={() => setPriorityFilter(TaskPriority.Medium)} isActive={priorityFilter === TaskPriority.Medium}>Media</FilterButton>
             <FilterButton onClick={() => setPriorityFilter(TaskPriority.Low)} isActive={priorityFilter === TaskPriority.Low}>Baja</FilterButton>
@@ -97,8 +112,8 @@ const TasksView: React.FC = () => {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredTasks.map(task => (
-            <Card key={task.id} className="flex flex-col justify-between">
+        {paginatedTasks.map(task => (
+            <Card key={task.id} className="flex flex-col justify-between hover:shadow-xl dark:hover:shadow-indigo-500/20 hover:-translate-y-1 transition-all duration-300">
                 <div>
                   <div className="flex justify-between items-start gap-2">
                       <h3 className="text-lg font-bold pr-4">{task.title}</h3>
@@ -119,6 +134,7 @@ const TasksView: React.FC = () => {
                 <div className="text-sm text-gray-500 dark:text-gray-400 mt-4 border-t dark:border-gray-700 pt-3">
                     <p><strong>Asignado a:</strong> {task.assignedTo}</p>
                     <p><strong>Vence:</strong> {new Date(task.dueDate).toLocaleDateString()}</p>
+                    {task.startTime && task.endTime && <p><strong>Hora:</strong> {task.startTime} - {task.endTime}</p>}
                     <div className="flex items-center gap-2 mt-2">
                        <button onClick={() => handleOpenModal('view', task)} className="text-gray-500 hover:text-indigo-600 p-1"><EyeIcon className="w-5 h-5"/></button>
                        <button onClick={() => handleOpenModal('edit', task)} className="text-gray-500 hover:text-green-600 p-1"><PencilIcon className="w-5 h-5"/></button>
@@ -130,6 +146,17 @@ const TasksView: React.FC = () => {
         {filteredTasks.length === 0 && <p className="text-gray-500 col-span-full text-center py-8">No hay tareas que coincidan con los filtros seleccionados.</p>}
       </div>
       
+      {totalPages > 1 && (
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onNextPage={nextPage}
+          onPrevPage={prevPage}
+          canGoNext={canGoNext}
+          canGoPrev={canGoPrev}
+        />
+      )}
+
       {isModalOpen && (
         <Modal title={getModalTitle()} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
             <TaskForm 

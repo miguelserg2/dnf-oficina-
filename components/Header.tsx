@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
-import { SearchIcon, UserCircleIcon, CloudArrowUpIcon, MenuIcon } from './Icons';
-import { useAppContext } from '../context/AppContext';
+import React from 'react';
+import { SearchIcon, MenuIcon, ArrowLeftOnRectangleIcon } from './Icons';
+import { useAuth } from '../context/AuthContext';
 
 interface HeaderProps {
   searchTerm: string;
@@ -10,17 +10,8 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ searchTerm, setSearchTerm, onMenuClick }) => {
-  const { saveState } = useAppContext();
-  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
+  const { currentUser, logout } = useAuth();
 
-  const handleSave = () => {
-    saveState();
-    setShowSaveConfirm(true);
-    setTimeout(() => {
-        setShowSaveConfirm(false);
-    }, 2500);
-  };
-  
   return (
     <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 sm:px-6 flex-shrink-0 gap-4">
       <div className="flex items-center flex-1 min-w-0">
@@ -40,24 +31,15 @@ const Header: React.FC<HeaderProps> = ({ searchTerm, setSearchTerm, onMenuClick 
       </div>
 
       <div className="flex items-center gap-2 sm:gap-4">
-        <div className="relative">
-            <button 
-                onClick={handleSave}
-                title="Guardar Cambios"
-                className="flex items-center justify-center gap-2 px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-300"
-            >
-                <CloudArrowUpIcon className="w-5 h-5" />
-                <span className="hidden sm:inline">Guardar</span>
-            </button>
-            {showSaveConfirm && (
-                <div className="absolute top-full mt-2 right-0 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-md shadow-lg animate-pulse">
-                    ¡Guardado!
-                </div>
-            )}
-        </div>
-
-        <button title="Perfil de Usuario" className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-          <UserCircleIcon className="w-6 h-6 text-gray-500" />
+        <span className="text-sm font-medium text-gray-600 dark:text-gray-300 hidden sm:block truncate" title={currentUser?.email}>
+            {currentUser?.email}
+        </span>
+        <button 
+            onClick={logout}
+            title="Cerrar Sesión"
+            className="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-red-500 dark:hover:text-red-400"
+        >
+          <ArrowLeftOnRectangleIcon className="w-6 h-6" />
         </button>
       </div>
     </header>

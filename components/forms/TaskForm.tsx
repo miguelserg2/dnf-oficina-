@@ -1,7 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Task, TaskPriority } from '../../types';
 import { fileToBase64 } from '../../utils/fileUtils';
 import { PaperClipIcon, XIcon, PencilIcon, TrashIcon } from '../Icons';
+import { useAppContext } from '../../context/AppContext';
+import { useAutosave } from '../../hooks/useAutosave';
+import AutosaveIndicator from '../common/AutosaveIndicator';
+
 
 type FormMode = 'create' | 'edit' | 'view';
 
@@ -15,11 +19,28 @@ interface TaskFormProps {
 }
 
 const TaskForm: React.FC<TaskFormProps> = ({ task, mode, onSave, onCancel, onDelete, onSetMode }) => {
+    const { addTask, updateTask } = useAppContext();
     const [formData, setFormData] = useState<Partial<Task>>({});
 
     useEffect(() => {
-        setFormData(task || { title: '', assignedTo: '', description: '', documentNumber: '', dueDate: '', priority: TaskPriority.Medium });
-    }, [task]);
+        const initialData = task || { title: '', assignedTo: '', description: '', documentNumber: '', dueDate: '', priority: TaskPriority.Medium, startTime: '', endTime: '' };
+        setFormData(initialData);
+    }, [task, mode]);
+
+    const handleSaveCallback = useCallback(async (dataToSave: Partial<Task>) => {
+        if (!dataToSave.title || !dataToSave.assignedTo || !dataToSave.description || !dataToSave.dueDate || !dataToSave.priority) {
+            return;
+        }
+        
+        if (dataToSave.id) {
+            updateTask(dataToSave as Task);
+        } else {
+            const newTask = addTask(dataToSave as Omit<Task, 'id' | 'status'>);
+            setFormData(prev => ({...prev, id: newTask.id, status: newTask.status }));
+        }
+    }, [addTask, updateTask]);
+
+    const [saveStatus, saveNow] = useAutosave({ data: formData, onSave: handleSaveCallback, interval: 2000 });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -34,14 +55,8 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, mode, onSave, onCancel, onDel
         }
     };
     
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if(formData.title && formData.assignedTo && formData.description && formData.dueDate && formData.priority) {
-            onSave(formData as Task);
-        }
-    };
-
     const priorityText = {
+        [TaskPriority.Urgent]: 'Urgente',
         [TaskPriority.High]: 'Alta',
         [TaskPriority.Medium]: 'Media',
         [TaskPriority.Low]: 'Baja',
@@ -55,6 +70,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, mode, onSave, onCancel, onDel
                     <div><h3 className="text-sm text-gray-500">Prioridad</h3><p>{priorityText[task.priority]}</p></div>
                     <div><h3 className="text-sm text-gray-500">Vence</h3><p>{new Date(task.dueDate).toLocaleDateString()}</p></div>
                     {task.documentNumber && <div><h3 className="text-sm text-gray-500">Nro. Documento</h3><p>{task.documentNumber}</p></div>}
+                    {task.startTime && task.endTime && <div className="col-span-2"><h3 className="text-sm text-gray-500">Hora</h3><p>{task.startTime} - {task.endTime}</p></div>}
                 </div>
                 <div><h3 className="text-sm text-gray-500">Descripción</h3><p className="whitespace-pre-wrap">{task.description}</p></div>
                 {task.attachment && (
@@ -75,7 +91,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, mode, onSave, onCancel, onDel
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={(e) => { e.preventDefault(); saveNow().then(() => onCancel()); }} className="space-y-4">
             <input type="text" name="title" placeholder="Título de la tarea" value={formData.title || ''} onChange={handleChange} className="w-full p-2 input-field" required />
             <div className="grid grid-cols-2 gap-4">
               <input type="text" name="assignedTo" placeholder="Asignado a (Nombre)" value={formData.assignedTo || ''} onChange={handleChange} className="w-full p-2 input-field" required />
@@ -86,10 +102,18 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, mode, onSave, onCancel, onDel
                  <div>
                     <label htmlFor="priority" className="sr-only">Prioridad</label>
                     <select id="priority" name="priority" value={formData.priority || TaskPriority.Medium} onChange={handleChange} className="w-full p-2 input-field" required>
+                        <option value={TaskPriority.Urgent}>Prioridad Urgente</option>
                         <option value={TaskPriority.High}>Prioridad Alta</option>
                         <option value={TaskPriority.Medium}>Prioridad Media</option>
                         <option value={TaskPriority.Low}>Prioridad Baja</option>
                     </select>
+                </div>
+            </div>
+            <div>
+                <label className="block text-sm font-medium mb-1">Hora (de - hasta)</label>
+                <div className="grid grid-cols-2 gap-4">
+                    <input type="time" name="startTime" value={formData.startTime || ''} onChange={handleChange} className="w-full p-2 input-field"/>
+                    <input type="time" name="endTime" value={formData.endTime || ''} onChange={handleChange} className="w-full p-2 input-field"/>
                 </div>
             </div>
             <textarea name="description" placeholder="Descripción" value={formData.description || ''} onChange={handleChange} rows={4} className="w-full p-2 input-field" required></textarea>
@@ -103,9 +127,10 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, mode, onSave, onCancel, onDel
                      <input type="file" onChange={handleFileChange} className="w-full text-sm file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-sm file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
                   )}
             </div>
-            <div className="flex gap-4">
-                <button type="submit" className="p-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Guardar</button>
-                <button type="button" onClick={onCancel} className="p-2 bg-gray-500 text-white rounded hover:bg-gray-600">Cancelar</button>
+            <div className="flex items-center gap-4 pt-2 border-t dark:border-gray-700">
+                <button type="button" onClick={saveNow} className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Guardar ahora</button>
+                <button type="button" onClick={onCancel} className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">Cerrar</button>
+                <AutosaveIndicator status={saveStatus} />
             </div>
         </form>
     );

@@ -1,22 +1,60 @@
 <!DOCTYPE html>
 <html lang="es">
   <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta charset="UTF--8" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 130 40'%3E%3Cg fill='%234f46e5'%3E%3Cpath d='M0 0 H15 C30 0, 30 40, 15 40 H0 V0 Z M10 10 V30 H15 C25 30, 25 10, 15 10 H10 Z' /%3E%3Cpath d='M40 0 H50 V15 L70 40 H80 V25 L60 0 H50 V40 H40 V0 Z' /%3E%3Cpath d='M90 0 H120 V10 H100 V17 H115 V27 H100 V40 H90 V0 Z' /%3E%3C/g%3E%3C/svg%3E">
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
-    <title>DNF - Oficina Virtual</title>
+    <title>OFFICE VIRTUAL DNF</title>
     <meta name="description" content="Una oficina virtual para gestionar calendarios, documentos, tareas e informes de forma colaborativa."/>
     
-    <!-- Theme Color for Browsers -->
+    <!-- PWA & Mobile meta tags -->
+    <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#4f46e5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Office DNF">
+    <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAJcEhZcwAACxMAAAsTAQCanBgAAATTSURBVHhe7d3NThxHEgbgsYATGFgB7yGshLgHl+B2uBtcgbuD28G1uA2XgFuQGwgbYEgIWMABwV7o+ZqZ7unpl+kpOFESST1dU1Xv7z/N9PTMNAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4n8j+73/i+/uP8P39J3Z3/x/x+/t//t//f/959t8f8fv7T8z+v2f/L7P/1t/7f8/nf4X9v9n/1d/7/+v395+Y/f+P+P39Z9j/i9n/5e/9P2f/n9f7/1L//z37fz/7H7L/n9n/ye/9P2P/l7/3/7f/P7P/z+z/5e/9f+b395/Y/4/Z//v39z/D/j9/+fuf3n+G/f+f/z0AAAAAAAAAAAAAAAAAAAAAAAAAALyr2/eP+P39p6b/37P/l9n/1t/7/57P/wr7fzP7v/q7/3/9/v4T8/+P+P39Z9j/i9n/5e/9P2f/n9f7/1L//z37fz/7H7L/n9n/ye/9P2P/l7/3/7f/P7P/z+z/5e/9f+b395/Y/4/Z//v39z/D/j9/+fuf3n+G/f+f/z0AAAAAAAAAAAAAAAAAAAAAAAAAAH5C8v9z/lH0/x2z/5e/9//W/+v/+L8/9N+3f8/235X9f4f8//p+P/v39/7f/7+z8/+75X9//7+/k/2/3fK/v/N/u9/Zf8/Yf9vZf//b/+fX/b/d8r+/9X+/8P2/9X+f2D//9r/z8z+/8P2f9/+f5H9/6PZ/6f3/x3y/7O/f/X/O/L/z5T9/1v/vz/8vz/037d/T/f/JvL/cwAAAAAAAAAAAAAAAAAAAAAAAAAA+FfK/j/L/n+d/f+T3/v/1f6v9/+fmf3/mP1fz/7fzv5/Zf9/huz/y+z/x+z/9ff+f8T+/9t/9vZ/8/v7T6z+/9T+/3fI/l9n/z+z/8v39/+2/+d/Z/8//n/f/n8u+/8j8/+z/7N/9vZ/8vv/9X5/iv3/nuz/e/v/6vv/9H5/iv3/d8j+v2f//z+z/1/v/2t/P/P7+/9f/wEAAAAAAAAAAAAAAAAAAAAAAAAAAH5X8v8j+/9V+/959v+Z3/v/6v3/mP3/j+z/5Xv7/4/Z/9n//5H9v2t/5/v7T+z/x+z/9vv7P+H//9//j9n/l+/vP7H/n+//x+z/6vv7P+H/X9v/2+z/9ff+T/b/79r/27/7f+b3/7X/l+3/V/v/W/b/e/v/0fs/AAAAAAAAAAAAAAAAAAAAAAAAAAAAwH/m+fs/2f+vz/7/7O9/xOz/l+3/K/P/c+z//+z/p/v/s/+r9//v2v9j/1//j9n/q+//5Xv7f2H/j+z/5fd/wv7f//eP+P1v//+1v+t/wv7fvL//8+z//+z/q+3/s/3/e//++P2f7f/X5+9/qv1fb/+/a/2P/f0cAAAAAAAAAAAAAAAD/D/2/LgAAAABJRU5ErkJggg==" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="DNF - Oficina Virtual">
+    <meta property="og:title" content="OFFICE VIRTUAL DNF">
     <meta property="og:description" content="Una oficina virtual para gestionar calendarios, documentos, tareas e informes de forma colaborativa.">
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Habilita el modo oscuro basado en clases y establece la fuente Inter
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: 0 },
+                '100%': { opacity: 1 },
+              },
+              scaleIn: {
+                '0%': { opacity: 0, transform: 'scale(0.95)' },
+                '100%': { opacity: 1, transform: 'scale(1)' },
+              },
+            },
+            animation: {
+              fadeIn: 'fadeIn 0.3s ease-out',
+              scaleIn: 'scaleIn 0.2s ease-out',
+            }
+          },
+        },
+      }
+    </script>
     <style>
       .input-field {
         @apply border rounded bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none;
@@ -28,12 +66,13 @@
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react": "https://aistudiocdn.com/react@^19.2.0",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.29.0"
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.29.0",
+    "jszip": "https://aistudiocdn.com/jszip@^3.10.1"
   }
 }
 </script>
 </head>
-  <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+  <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

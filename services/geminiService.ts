@@ -1,16 +1,15 @@
 import { GoogleGenAI } from "@google/genai";
 
-// --- INSTRUCCIONES PARA EL DESPLIEGUE EN VERCEL ---
+// --- INSTRUCCIONES PARA EL DESPLIEGUE (VERCEL/NETLIFY) ---
 // Para que la aplicación funcione correctamente en producción,
 // debes configurar la variable de entorno `API_KEY` en los ajustes
-// de tu proyecto en Vercel.
+// de tu proyecto en tu plataforma de hosting (Vercel, Netlify, etc.).
 //
-// 1. Ve a tu proyecto en Vercel.
-// 2. Ve a la pestaña "Settings".
-// 3. Haz clic en "Environment Variables".
-// 4. Añade una nueva variable con el nombre `API_KEY` y pega tu clave de la API de Gemini como valor.
-// 5. Guarda y vuelve a desplegar tu proyecto para que los cambios surtan efecto.
-// ----------------------------------------------------
+// 1. Ve al panel de control de tu proyecto.
+// 2. Busca la sección de "Settings" > "Environment Variables".
+// 3. Añade una nueva variable con el nombre `API_KEY` y pega tu clave de la API de Gemini como valor.
+// 4. Guarda y vuelve a desplegar tu proyecto para que los cambios surtan efecto.
+// -----------------------------------------------------------
 
 const API_KEY = process.env.API_KEY;
 

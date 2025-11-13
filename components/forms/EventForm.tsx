@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { CalendarEvent, Attachment } from '../../types';
+import React, { useState, useEffect, useCallback } from 'react';
+import { CalendarEvent } from '../../types';
 import { fileToBase64 } from '../../utils/fileUtils';
 import { PaperClipIcon, XIcon, PencilIcon, TrashIcon } from '../Icons';
+import { useAppContext } from '../../context/AppContext';
+import { useAutosave } from '../../hooks/useAutosave';
+import AutosaveIndicator from '../common/AutosaveIndicator';
 
 type FormMode = 'create' | 'edit' | 'view';
 
@@ -15,11 +18,31 @@ interface EventFormProps {
 }
 
 const EventForm: React.FC<EventFormProps> = ({ event, mode, onSave, onCancel, onDelete, onSetMode }) => {
-    const [formData, setFormData] = useState<Partial<CalendarEvent>>({});
+    const { addEvent, updateEvent } = useAppContext();
+    const [formData, setFormData] = useState<Partial<CalendarEvent> & { participantsString?: string }>({});
 
     useEffect(() => {
-        setFormData(event || { title: '', name: '', description: '', documentNumber: '' });
-    }, [event]);
+        const initialData = event ? { ...event, participantsString: event.participants?.join(', ') || '' } : { title: '', name: '', description: '', documentNumber: '', location: '', participantsString: '' };
+        setFormData(initialData);
+    }, [event, mode]);
+    
+    const handleSaveCallback = useCallback(async (dataToSave: Partial<CalendarEvent> & { participantsString?: string }) => {
+        if (!dataToSave.title || !dataToSave.name || !dataToSave.description || !dataToSave.start || !dataToSave.end) {
+            return;
+        }
+
+        const eventData = { ...dataToSave, participants: dataToSave.participantsString?.split(',').map(p => p.trim()).filter(Boolean) || [] };
+        delete eventData.participantsString;
+        
+        if (eventData.id) {
+            updateEvent(eventData as CalendarEvent);
+        } else {
+            const newEvent = addEvent(eventData as Omit<CalendarEvent, 'id'>);
+            setFormData(prev => ({ ...prev, id: newEvent.id }));
+        }
+    }, [addEvent, updateEvent]);
+    
+    const [saveStatus, saveNow] = useAutosave({ data: formData, onSave: handleSaveCallback, interval: 2000 });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -33,26 +56,33 @@ const EventForm: React.FC<EventFormProps> = ({ event, mode, onSave, onCancel, on
             setFormData(prev => ({ ...prev, attachment: { name: file.name, type: file.type, content } }));
         }
     };
-    
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if(formData.title && formData.name && formData.description && formData.start && formData.end) {
-            onSave(formData as CalendarEvent);
-        }
-    };
 
     if (mode === 'view' && event) {
         return (
             <div className="space-y-4">
-                <div>
-                    <h3 className="text-sm text-gray-500">Responsable</h3>
-                    <p>{event.name}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h3 className="text-sm text-gray-500">Responsable</h3>
+                        <p>{event.name}</p>
+                    </div>
+                     <div>
+                        <h3 className="text-sm text-gray-500">Ubicación</h3>
+                        <p>{event.location || 'No especificada'}</p>
+                    </div>
                 </div>
                 <div>
                     <h3 className="text-sm text-gray-500">Fechas</h3>
                     <p>{new Date(event.start).toLocaleString()} - {new Date(event.end).toLocaleString()}</p>
                 </div>
                 {event.documentNumber && <div><h3 className="text-sm text-gray-500">Nro. Documento</h3><p>{event.documentNumber}</p></div>}
+                 {event.participants && event.participants.length > 0 && (
+                    <div>
+                        <h3 className="text-sm text-gray-500">Participantes</h3>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                            {event.participants.map(p => <span key={p} className="bg-gray-200 dark:bg-gray-700 text-sm px-2 py-1 rounded">{p}</span>)}
+                        </div>
+                    </div>
+                )}
                 <div>
                     <h3 className="text-sm text-gray-500">Descripción</h3>
                     <p className="whitespace-pre-wrap">{event.description}</p>
@@ -75,14 +105,21 @@ const EventForm: React.FC<EventFormProps> = ({ event, mode, onSave, onCancel, on
     }
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={(e) => { e.preventDefault(); saveNow().then(() => onCancel()); }} className="space-y-4">
             <input type="text" name="title" placeholder="Título del evento" value={formData.title || ''} onChange={handleChange} className="w-full p-2 input-field" required />
-            <input type="text" name="name" placeholder="Nombre del responsable" value={formData.name || ''} onChange={handleChange} className="w-full p-2 input-field" required />
-            <div className="grid grid-cols-2 gap-4">
-                <input type="datetime-local" name="start" value={formData.start ? formData.start.substring(0,16) : ''} onChange={handleChange} className="w-full p-2 input-field" required/>
-                <input type="datetime-local" name="end" value={formData.end ? formData.end.substring(0,16) : ''} onChange={handleChange} className="w-full p-2 input-field" required/>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="text" name="name" placeholder="Nombre del responsable" value={formData.name || ''} onChange={handleChange} className="w-full p-2 input-field" required />
+                 <input type="text" name="location" placeholder="Ubicación (ej. Sala 1, Online)" value={formData.location || ''} onChange={handleChange} className="w-full p-2 input-field" />
+            </div>
+            <div>
+                <label className="block text-sm font-medium mb-1">Hora (de - hasta)</label>
+                <div className="grid grid-cols-2 gap-4">
+                    <input type="datetime-local" name="start" value={formData.start ? formData.start.substring(0,16) : ''} onChange={handleChange} className="w-full p-2 input-field" required/>
+                    <input type="datetime-local" name="end" value={formData.end ? formData.end.substring(0,16) : ''} onChange={handleChange} className="w-full p-2 input-field" required/>
+                </div>
             </div>
             <input type="text" name="documentNumber" placeholder="Número de Documento (Opcional)" value={formData.documentNumber || ''} onChange={handleChange} className="w-full p-2 input-field" />
+            <input type="text" name="participantsString" placeholder="Participantes (separados por coma)" value={formData.participantsString || ''} onChange={handleChange} className="w-full p-2 input-field" />
             <textarea name="description" placeholder="Descripción" value={formData.description || ''} onChange={handleChange} rows={4} className="w-full p-2 input-field" required></textarea>
             <div>
                   <label className="block text-sm font-medium mb-1">Adjuntar archivo</label>
@@ -94,9 +131,10 @@ const EventForm: React.FC<EventFormProps> = ({ event, mode, onSave, onCancel, on
                      <input type="file" onChange={handleFileChange} className="w-full text-sm file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-sm file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
                   )}
             </div>
-            <div className="flex gap-4">
-                <button type="submit" className="p-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Guardar</button>
-                <button type="button" onClick={onCancel} className="p-2 bg-gray-500 text-white rounded hover:bg-gray-600">Cancelar</button>
+            <div className="flex items-center gap-4 pt-2 border-t dark:border-gray-700">
+                <button type="button" onClick={saveNow} className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Guardar ahora</button>
+                <button type="button" onClick={onCancel} className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">Cerrar</button>
+                <AutosaveIndicator status={saveStatus} />
             </div>
         </form>
     );
